@@ -2,6 +2,8 @@ import os
 from PIL import Image
 import filetype
 from config import Config
+import tempfile
+from decimal import Decimal  # Add this import
 
 
 def allowed_file(filename, file_type):
@@ -64,16 +66,40 @@ def get_mime_type(file_path):
 
 
 def get_image_dimensions(file_path):
-    """Get image dimensions"""
+    """Get image dimensions - Windows compatible version"""
     try:
-        with Image.open(file_path) as img:
-            return {"width": img.width, "height": img.height}
-    except:
+        # Copy file to a new location to avoid locking issues
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".img") as tmp_img:
+            tmp_path = tmp_img.name
+            with open(file_path, "rb") as src:
+                tmp_img.write(src.read())
+
+        # Now open the copied file
+        with Image.open(tmp_path) as img:
+            dimensions = {"width": img.width, "height": img.height}
+
+        # Delete the temporary copy
+        os.unlink(tmp_path)
+        return dimensions
+    except Exception as e:
+        print(f"Error getting image dimensions: {e}")
         return {"width": 0, "height": 0}
 
 
 def format_file_size(size):
     """Format file size to human readable format"""
+    if size is None:
+        return "0 B"
+
+    # Handle Decimal type
+    if isinstance(size, Decimal):
+        size = float(size)
+
+    try:
+        size = float(size)
+    except (ValueError, TypeError):
+        return "0 B"
+
     if size == 0:
         return "0 B"
 
@@ -136,3 +162,15 @@ def validate_file_mime_type(file_path, expected_type):
         return mime_type.startswith("video/") or mime_type in video_mimes
 
     return False
+
+
+def convert_decimal_to_float(data):
+    """Recursively convert Decimal objects to float in a dictionary/list"""
+    if isinstance(data, Decimal):
+        return float(data)
+    elif isinstance(data, dict):
+        return {k: convert_decimal_to_float(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_decimal_to_float(item) for item in data]
+    else:
+        return data
