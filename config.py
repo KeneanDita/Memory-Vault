@@ -5,11 +5,16 @@ load_dotenv()
 
 
 class Config:
+    # Flask Secret Key (required for sessions)
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+
+    # AWS Configuration for LocalStack
     AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL", "http://localhost:4566")
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "test")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "test")
     AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
 
+    # S3 Configuration
     S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "memory-vault")
 
     # DynamoDB Tables
