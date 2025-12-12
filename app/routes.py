@@ -208,13 +208,15 @@ def browse():
     # Format file sizes and prepare for template
     for item in items:
         if hasattr(item, "file_size"):
-            # Ensure file_size is not Decimal before formatting
             item.formatted_size = format_file_size(item.file_size)
 
     # Get counts for all tabs
     all_notes = db_service.get_all_notes()
     all_images = db_service.get_all_images()
     all_videos = db_service.get_all_videos()
+
+    # Calculate total_count
+    total_count = len(all_notes) + len(all_images) + len(all_videos)
 
     return render_template(
         "browse.html",
@@ -225,6 +227,7 @@ def browse():
         notes_count=len(all_notes),
         images_count=len(all_images),
         videos_count=len(all_videos),
+        total_count=total_count,  # Add this
     )
 
 
