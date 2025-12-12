@@ -1,82 +1,172 @@
-// File upload preview
+// Memory Vault Main JavaScript
+
 document.addEventListener("DOMContentLoaded", function () {
-  // File input change handler
-  const fileInput = document.getElementById("file");
-  if (fileInput) {
-    fileInput.addEventListener("change", function (e) {
-      const fileName = e.target.files[0]?.name || "No file chosen";
-      const fileSize = e.target.files[0]?.size || 0;
-
-      // Update file info display
-      const fileInfo = document.getElementById("fileInfo");
-      if (fileInfo) {
-        fileInfo.textContent = `${fileName} (${formatFileSize(fileSize)})`;
-      }
-
-      // Validate file size (100MB limit)
-      const maxSize = 100 * 1024 * 1024; // 100MB
-      if (fileSize > maxSize) {
-        alert("File size exceeds 100MB limit");
-        e.target.value = "";
-      }
-    });
-  }
-
-  // Auto-switch tab based on file type selection
-  const fileTypeSelect = document.getElementById("file_type");
-  if (fileTypeSelect) {
-    fileTypeSelect.addEventListener("change", function () {
-      const tabId = this.value + "-tab";
-      const tab = document.getElementById(tabId);
-      if (tab) {
-        new bootstrap.Tab(tab).show();
-      }
-    });
-  }
-
   // Initialize tooltips
   const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   tooltips.forEach((tooltip) => new bootstrap.Tooltip(tooltip));
-});
 
-// Format file size
-function formatFileSize(bytes) {
-  if (bytes === 0) return "0 Bytes";
+  // Initialize popovers
+  const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+  popovers.forEach((popover) => new bootstrap.Popover(popover));
 
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  // Add animation to stat cards on scroll
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px",
+  };
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
+  const observer = new IntersectionObserver(function (entries) {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("fade-in");
+      }
+    });
+  }, observerOptions);
 
-// Confirm delete
-function confirmDelete(fileType, itemId, itemName) {
-  if (
-    confirm(`Are you sure you want to delete "${itemName || "this item"}"?`)
-  ) {
-    fetch(`/delete/${fileType}/${itemId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((response) => {
-      if (response.ok) {
-        window.location.reload();
+  // Observe all cards for animation
+  document.querySelectorAll(".card").forEach((card) => {
+    observer.observe(card);
+  });
+
+  // File upload progress simulation
+  window.simulateUploadProgress = function (button) {
+    const progressBar = button.parentElement.querySelector(".progress-bar");
+    let width = 0;
+    const interval = setInterval(() => {
+      if (width >= 100) {
+        clearInterval(interval);
+        button.disabled = false;
+        button.innerHTML =
+          '<i class="bi bi-check-circle me-2"></i>Upload Complete';
+        button.classList.remove("btn-primary");
+        button.classList.add("btn-success");
+      } else {
+        width += 5;
+        progressBar.style.width = width + "%";
+        progressBar.textContent = width + "%";
+      }
+    }, 100);
+  };
+
+  // Search functionality enhancement
+  const searchInput = document.querySelector('input[name="search"]');
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      const searchTerm = this.value.toLowerCase();
+      const rows = document.querySelectorAll("tbody tr");
+
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? "" : "none";
+      });
+    });
+  }
+
+  // Theme switcher (optional)
+  const themeToggle = document.getElementById("themeToggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", function () {
+      const currentTheme =
+        document.documentElement.getAttribute("data-bs-theme");
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-bs-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+
+      this.innerHTML =
+        newTheme === "dark"
+          ? '<i class="bi bi-moon"></i>'
+          : '<i class="bi bi-sun"></i>';
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-bs-theme", savedTheme);
+    themeToggle.innerHTML =
+      savedTheme === "dark"
+        ? '<i class="bi bi-moon"></i>'
+        : '<i class="bi bi-sun"></i>';
+  }
+
+  // File download counter
+  document.querySelectorAll('a[href*="download"]').forEach((link) => {
+    link.addEventListener("click", function () {
+      const fileName = this.getAttribute("data-filename") || "unknown";
+      console.log(`Download initiated: ${fileName}`);
+      // You could send analytics here
+    });
+  });
+
+  // Auto-dismiss alerts after 5 seconds
+  const alerts = document.querySelectorAll(".alert:not(.alert-permanent)");
+  alerts.forEach((alert) => {
+    setTimeout(() => {
+      const bsAlert = new bootstrap.Alert(alert);
+      bsAlert.close();
+    }, 5000);
+  });
+
+  // Print page functionality
+  window.printPage = function () {
+    window.print();
+  };
+
+  // Copy to clipboard functionality
+  window.copyToClipboard = function (text) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        alert("Copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+
+  // Responsive table handling
+  function handleResponsiveTables() {
+    const tables = document.querySelectorAll(".table-responsive");
+    tables.forEach((table) => {
+      if (table.offsetWidth < table.scrollWidth) {
+        table.parentElement.classList.add("table-scroll-hint");
       }
     });
   }
-}
 
-// Search functionality
-function searchFiles() {
-  const searchTerm = document.getElementById("searchInput").value;
-  const currentTab = document
-    .querySelector(".nav-tabs .active")
-    .getAttribute("data-bs-target")
-    .replace("#", "");
+  handleResponsiveTables();
+  window.addEventListener("resize", handleResponsiveTables);
 
-  window.location.href = `/browse?tab=${currentTab}&search=${encodeURIComponent(
-    searchTerm
-  )}`;
-}
+  // Smooth scroll to top
+  const scrollToTopBtn = document.getElementById("scrollToTop");
+  if (scrollToTopBtn) {
+    window.addEventListener("scroll", function () {
+      if (window.pageYOffset > 300) {
+        scrollToTopBtn.style.display = "block";
+      } else {
+        scrollToTopBtn.style.display = "none";
+      }
+    });
+
+    scrollToTopBtn.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  // Form validation enhancement
+  const forms = document.querySelectorAll("form[novalidate]");
+  forms.forEach((form) => {
+    form.addEventListener(
+      "submit",
+      function (event) {
+        if (!this.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        this.classList.add("was-validated");
+      },
+      false
+    );
+  });
+
+  // Initialize
+  console.log("Memory Vault UI initialized");
+});
