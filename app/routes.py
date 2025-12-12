@@ -75,24 +75,38 @@ def upload():
             flash("File type not allowed", "error")
             return redirect(request.url)
 
-        # Save file temporarily to get metadata
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            file.save(tmp_file.name)
-            tmp_path = tmp_file.name
+        # Create a unique temporary file name
+        import tempfile
+        import shutil
+
+        tmp_path = None
+        try:
+            # Save to a temporary file
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=os.path.splitext(file.filename)[1]
+            ) as tmp_file:
+                tmp_path = tmp_file.name
+                file.save(tmp_path)
 
             # Validate actual file type
             if not validate_file_mime_type(tmp_path, file_type):
                 flash(f"File content doesn't match expected type: {file_type}", "error")
-                os.unlink(tmp_path)
+                if tmp_path and os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
                 return redirect(request.url)
 
             # Get file metadata
             file_size = os.path.getsize(tmp_path)
             mime_type = get_mime_type(tmp_path)
 
-            # Upload to S3
-            file.seek(0)  # Reset file pointer
-            upload_result = s3_service.upload_file(file, mime_type, folder=file_type)
+            # Upload to S3 - read from the saved file
+            with open(tmp_path, "rb") as file_obj:
+                upload_result = s3_service.upload_file(
+                    file_obj,
+                    mime_type,
+                    folder=file_type,
+                    original_filename=file.filename,
+                )
 
             if upload_result["success"]:
                 # Prepare metadata for DynamoDB
@@ -132,8 +146,25 @@ def upload():
             else:
                 flash(f"Upload failed: {upload_result['error']}", "error")
 
-            # Cleanup temp file
-            os.unlink(tmp_path)
+        except Exception as e:
+            flash(f"Error processing file: {str(e)}", "error")
+            import traceback
+
+            print(f"Upload error: {traceback.format_exc()}")
+        finally:
+            # Cleanup temp file with retry logic for Windows
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.unlink(tmp_path)
+                except PermissionError:
+                    # Windows might still have the file locked, try again after a delay
+                    import time
+
+                    time.sleep(0.1)
+                    try:
+                        os.unlink(tmp_path)
+                    except:
+                        pass  # Give up if still locked
 
         return redirect(url_for("main.browse"))
 
@@ -177,6 +208,7 @@ def browse():
     # Format file sizes and prepare for template
     for item in items:
         if hasattr(item, "file_size"):
+            # Ensure file_size is not Decimal before formatting
             item.formatted_size = format_file_size(item.file_size)
 
     # Get counts for all tabs
