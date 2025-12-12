@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    environment:
+      - SERVICES=s3,dynamodb
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./.localstack:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+memoryvault:
+    build: .
+    container_name: memoryvault
+    ports:
+      - "5000:5000"
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - NOTES_TABLE=MemoryVaultNotes
+      - IMAGES_TABLE=MemoryVaultImages
+      - VIDEOS_TABLE=MemoryVaultVideos
+      - S3_BUCKET_NAME=memory-vault
+    depends_on:
+      localstack:
+        condition: service_healthy
+    volumes:
+      - "./app:/app/app"
+      - "./config.py:/app/config.py"
+      - "./run.py:/app/run.py"
+
