@@ -1,0 +1,180 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<div class="fade-in">
+  <!-- Hero Section -->
+  <div class="text-center mb-5 py-5">
+    <div class="logo-icon display-1 mb-4">
+      <i class="bi bi-safe-fill text-primary"></i>
+    </div>
+    <h1 class="display-4 fw-bold mb-3">
+      Welcome to <span class="text-primary">Memory Vault</span>
+    </h1>
+    <p class="lead text-muted mb-4">
+      Secure cloud storage for your notes, images, and videos
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a
+        href="{{ url_for('main.upload') }}"
+        class="btn btn-primary btn-lg px-4"
+      >
+        <i class="bi bi-cloud-upload me-2"></i>Start Uploading
+      </a>
+      <a
+        href="{{ url_for('main.browse') }}"
+        class="btn btn-outline-primary btn-lg px-4"
+      >
+        <i class="bi bi-folder2-open me-2"></i>Browse Files
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="row mb-5">
+    <div class="col-md-4 mb-4">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <div class="file-icon doc mx-auto">
+              <i class="bi bi-file-earmark-text text-white"></i>
+            </div>
+          </div>
+          <h3 class="stats-number">{{ notes_count }}</h3>
+          <h5 class="text-muted mb-0">Documents</h5>
+          <p class="text-muted mt-2">PDF, DOC, TXT, and more</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <div class="file-icon image mx-auto">
+              <i class="bi bi-image text-white"></i>
+            </div>
+          </div>
+          <h3 class="stats-number">{{ images_count }}</h3>
+          <h5 class="text-muted mb-0">Images</h5>
+          <p class="text-muted mt-2">PNG, JPG, SVG, and more</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card stats-card h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <div class="file-icon video mx-auto">
+              <i class="bi bi-camera-video text-white"></i>
+            </div>
+          </div>
+          <h3 class="stats-number">{{ videos_count }}</h3>
+          <h5 class="text-muted mb-0">Videos</h5>
+          <p class="text-muted mt-2">MP4, MKV, MOV, and more</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card mb-5">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="bi bi-lightning me-2"></i>Quick Actions</h4>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="d-grid">
+            <a
+              href="{{ url_for('main.upload') }}?type=notes"
+              class="btn btn-outline-primary btn-lg"
+            >
+              <i class="bi bi-file-earmark-plus me-2"></i>Upload Document
+            </a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-grid">
+            <a
+              href="{{ url_for('main.upload') }}?type=images"
+              class="btn btn-outline-primary btn-lg"
+            >
+              <i class="bi bi-image me-2"></i>Upload Image
+            </a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-grid">
+            <a
+              href="{{ url_for('main.upload') }}?type=videos"
+              class="btn btn-outline-primary btn-lg"
+            >
+              <i class="bi bi-camera-video me-2"></i>Upload Video
+            </a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="d-grid">
+            <a
+              href="{{ url_for('main.search') }}"
+              class="btn btn-outline-primary btn-lg"
+            >
+              <i class="bi bi-search me-2"></i>Search Files
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Files Preview -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Files</h4>
+      <a href="{{ url_for('main.browse') }}" class="btn btn-sm btn-primary"
+        >View All</a
+      >
+    </div>
+    <div class="card-body">
+      {% if recent_files %}
+      <div class="row">
+        {% for file in recent_files[:4] %}
+        <div class="col-md-3 mb-3">
+          <div class="card file-card h-100">
+            <div class="card-body">
+              <div class="file-icon {{ file.file_type.split('/')[0] }} mb-3">
+                {% if file.file_type.startswith('image/') %}
+                <i class="bi bi-image text-white"></i>
+                {% elif file.file_type.startswith('video/') %}
+                <i class="bi bi-camera-video text-white"></i>
+                {% else %}
+                <i class="bi bi-file-earmark-text text-white"></i>
+                {% endif %}
+              </div>
+              <h6 class="mb-1 text-truncate">
+                {{ file.title or file.original_filename }}
+              </h6>
+              <small class="text-muted">{{ file.formatted_size }}</small>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-4">
+        <i class="bi bi-folder-x display-4 text-muted mb-3"></i>
+        <p class="text-muted">No files uploaded yet</p>
+        <a href="{{ url_for('main.upload') }}" class="btn btn-primary"
+          >Upload Your First File</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  // Add any homepage-specific JavaScript here
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("Memory Vault Homepage loaded");
+  });
+</script>
+{% endblock %}
