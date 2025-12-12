@@ -1,0 +1,63 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+venv.bak/
+env.bak/
+
+# Flask instance folder (contains local config & secrets)
+instance/
+
+# Environment files
+.env
+.flaskenv
+
+# Database files
+*.sqlite3
+*.db
+
+# Logs and runtime files
+*.log
+*.pid
+*.sock
+
+# Testing, coverage, caches
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.cache/
+.mypy_cache/
+.pyre/
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.egg
+*.whl
+pip-wheel-metadata/
+build/
+dist/
+
+# Misc
+celerybeat-schedule
