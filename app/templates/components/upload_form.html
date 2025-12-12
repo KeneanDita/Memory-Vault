@@ -1,0 +1,46 @@
+<form
+  method="POST"
+  action="{{ url_for('main.upload') }}"
+  enctype="multipart/form-data"
+>
+  <input type="hidden" name="file_type" value="{{ file_type }}" />
+
+  <div class="mb-3">
+    <label for="title" class="form-label">Title (Optional)</label>
+    <input
+      type="text"
+      class="form-control"
+      id="title"
+      name="title"
+      placeholder="Enter a descriptive title"
+    />
+  </div>
+
+  <div class="mb-3">
+    <label for="description" class="form-label">Description (Optional)</label>
+    <textarea
+      class="form-control"
+      id="description"
+      name="description"
+      rows="3"
+      placeholder="Enter a description"
+    ></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label for="file" class="form-label">Select File</label>
+    <input class="form-control" type="file" id="file" name="file" required />
+    <div class="form-text">
+      Allowed extensions: {{ allowed_extensions }}<br />
+      Max file size: 100MB<br />
+      Example: {{ example_files }}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Upload File</button>
+  <a
+    href="{{ url_for('main.browse', tab=file_type) }}"
+    class="btn btn-outline-secondary"
+    >Browse {{ file_type|title }}</a
+  >
+</form>
