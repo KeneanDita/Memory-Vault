@@ -1,0 +1,241 @@
+<!-- Main Navigation Tabs Component -->
+<ul class="nav nav-tabs mb-4" id="{{ tab_id }}" role="tablist">
+  <!-- Notes Tab -->
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link {% if current_tab == 'notes' %}active{% endif %}"
+      id="notes-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#notes-content"
+      type="button"
+      role="tab"
+      onclick="switchTab('notes')"
+    >
+      <span class="tab-icon">📝</span>
+      <span class="tab-label">Notes</span>
+      {% if show_counts %}
+      <span class="badge bg-secondary ms-2"
+        >{{ notes_count|default('0') }}</span
+      >
+      {% endif %}
+    </button>
+  </li>
+
+  <!-- Images Tab -->
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link {% if current_tab == 'images' %}active{% endif %}"
+      id="images-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#images-content"
+      type="button"
+      role="tab"
+      onclick="switchTab('images')"
+    >
+      <span class="tab-icon">🖼️</span>
+      <span class="tab-label">Images</span>
+      {% if show_counts %}
+      <span class="badge bg-secondary ms-2"
+        >{{ images_count|default('0') }}</span
+      >
+      {% endif %}
+    </button>
+  </li>
+
+  <!-- Videos Tab -->
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link {% if current_tab == 'videos' %}active{% endif %}"
+      id="videos-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#videos-content"
+      type="button"
+      role="tab"
+      onclick="switchTab('videos')"
+    >
+      <span class="tab-icon">🎥</span>
+      <span class="tab-label">Videos</span>
+      {% if show_counts %}
+      <span class="badge bg-secondary ms-2"
+        >{{ videos_count|default('0') }}</span
+      >
+      {% endif %}
+    </button>
+  </li>
+
+  <!-- Statistics Tab (Optional) -->
+  {% if show_stats %}
+  <li class="nav-item ms-auto" role="presentation">
+    <button
+      class="nav-link {% if current_tab == 'stats' %}active{% endif %}"
+      id="stats-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#stats-content"
+      type="button"
+      role="tab"
+      onclick="switchTab('stats')"
+    >
+      <span class="tab-icon">📊</span>
+      <span class="tab-label">Statistics</span>
+    </button>
+  </li>
+  {% endif %}
+</ul>
+
+<!-- Tab Content Areas -->
+<div class="tab-content" id="{{ tab_id }}Content">
+  <!-- Notes Content -->
+  <div
+    class="tab-pane fade {% if current_tab == 'notes' %}show active{% endif %}"
+    id="notes-content"
+    role="tabpanel"
+  >
+    {% if notes_content %} {{ notes_content|safe }} {% else %} {% include
+    'components/file_list.html' with items=notes_items, file_type='notes',
+    current_page=notes_page, total_pages=notes_total_pages,
+    search_term=search_term %} {% endif %}
+  </div>
+
+  <!-- Images Content -->
+  <div
+    class="tab-pane fade {% if current_tab == 'images' %}show active{% endif %}"
+    id="images-content"
+    role="tabpanel"
+  >
+    {% if images_content %} {{ images_content|safe }} {% else %} {% include
+    'components/file_list.html' with items=images_items, file_type='images',
+    current_page=images_page, total_pages=images_total_pages,
+    search_term=search_term %} {% endif %}
+  </div>
+
+  <!-- Videos Content -->
+  <div
+    class="tab-pane fade {% if current_tab == 'videos' %}show active{% endif %}"
+    id="videos-content"
+    role="tabpanel"
+  >
+    {% if videos_content %} {{ videos_content|safe }} {% else %} {% include
+    'components/file_list.html' with items=videos_items, file_type='videos',
+    current_page=videos_page, total_pages=videos_total_pages,
+    search_term=search_term %} {% endif %}
+  </div>
+
+  <!-- Statistics Content -->
+  {% if show_stats %}
+  <div
+    class="tab-pane fade {% if current_tab == 'stats' %}show active{% endif %}"
+    id="stats-content"
+    role="tabpanel"
+  >
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <h3>{{ notes_count|default('0') }}</h3>
+            <p class="text-muted">Notes</p>
+            <small>{{ notes_size|default('0') }} total</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <h3>{{ images_count|default('0') }}</h3>
+            <p class="text-muted">Images</p>
+            <small>{{ images_size|default('0') }} total</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <h3>{{ videos_count|default('0') }}</h3>
+            <p class="text-muted">Videos</p>
+            <small>{{ videos_size|default('0') }} total</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  .nav-tabs .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6c757d;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .nav-tabs .nav-link:hover {
+    border-bottom: 3px solid #dee2e6;
+    color: #495057;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 3px solid #0d6efd;
+    background-color: transparent;
+  }
+
+  .tab-icon {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+  }
+
+  .tab-label {
+    font-size: 0.95rem;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    opacity: 0.3;
+  }
+</style>
+
+<script>
+  function switchTab(tabName) {
+    // Update URL without page reload
+    const url = new URL(window.location);
+    url.searchParams.set("tab", tabName);
+    window.history.pushState({}, "", url);
+
+    // If on browse page, trigger search in current tab
+    if (window.location.pathname.includes("/browse")) {
+      const searchInput = document.querySelector('input[name="search"]');
+      if (searchInput && searchInput.value) {
+        // You could trigger an AJAX call here for dynamic loading
+        // For now, let the form submit naturally
+      }
+    }
+  }
+
+  // Handle browser back/forward buttons
+  window.addEventListener("popstate", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get("tab") || "notes";
+
+    // Activate the correct tab
+    const tabButton = document.getElementById(`${tab}-tab`);
+    if (tabButton) {
+      const tabInstance = new bootstrap.Tab(tabButton);
+      tabInstance.show();
+    }
+  });
+
+  // Initialize tabs on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabButtons.forEach((button) => {
+      button.addEventListener("shown.bs.tab", function (event) {
+        const tabName = event.target.id.replace("-tab", "");
+        switchTab(tabName);
+      });
+    });
+  });
+</script>
