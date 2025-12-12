@@ -17,12 +17,19 @@ class S3Service:
         )
         self.bucket_name = Config.S3_BUCKET_NAME
 
-    def upload_file(self, file, content_type, folder="uploads"):
+    def upload_file(
+        self, file_obj, content_type, folder="uploads", original_filename=None
+    ):
         """Upload a file to S3 and return its URL"""
         try:
             # Generate unique filename
-            original_filename = secure_filename(file.filename)
-            file_extension = os.path.splitext(original_filename)[1].lower()
+            if original_filename:
+                original_filename = secure_filename(original_filename)
+                file_extension = os.path.splitext(original_filename)[1].lower()
+            else:
+                original_filename = "uploaded_file"
+                file_extension = ""
+
             unique_filename = f"{uuid.uuid4()}{file_extension}"
 
             # Create S3 key
@@ -30,7 +37,10 @@ class S3Service:
 
             # Upload to S3
             self.s3_client.upload_fileobj(
-                file, self.bucket_name, s3_key, ExtraArgs={"ContentType": content_type}
+                file_obj,
+                self.bucket_name,
+                s3_key,
+                ExtraArgs={"ContentType": content_type},
             )
 
             # Generate URL (LocalStack specific)
