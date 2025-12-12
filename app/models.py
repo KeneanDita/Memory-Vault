@@ -1,7 +1,7 @@
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from typing import Optional, Dict, Any
-from decimal import Decimal
+from decimal import Decimal  # Add this import
 import json
 
 
@@ -89,53 +89,90 @@ class Video(BaseFile):
 # Factory functions for creating models from DynamoDB items
 def create_note_from_dict(data: Dict[str, Any]) -> Note:
     """Create Note object from DynamoDB item"""
+    # Convert Decimal values to float
+    converted_data = {}
+    for key, value in data.items():
+        if isinstance(value, Decimal):
+            converted_data[key] = float(value)
+        elif isinstance(value, dict):
+            # Recursively convert nested dicts
+            converted_data[key] = {
+                k: float(v) if isinstance(v, Decimal) else v for k, v in value.items()
+            }
+        else:
+            converted_data[key] = value
+
     return Note(
-        note_id=data.get("note_id", ""),
-        title=data.get("title"),
-        description=data.get("description"),
-        s3_key=data.get("s3_key", ""),
-        file_url=data.get("file_url", ""),
-        original_filename=data.get("original_filename", ""),
-        file_type=data.get("file_type", ""),
-        file_size=data.get("file_size", 0),
-        created_at=data.get("created_at"),
-        updated_at=data.get("updated_at"),
-        tags=data.get("tags", []),
+        note_id=converted_data.get("note_id", ""),
+        title=converted_data.get("title"),
+        description=converted_data.get("description"),
+        s3_key=converted_data.get("s3_key", ""),
+        file_url=converted_data.get("file_url", ""),
+        original_filename=converted_data.get("original_filename", ""),
+        file_type=converted_data.get("file_type", ""),
+        file_size=converted_data.get("file_size", 0),
+        created_at=converted_data.get("created_at"),
+        updated_at=converted_data.get("updated_at"),
+        tags=converted_data.get("tags", []),
     )
 
 
 def create_image_from_dict(data: Dict[str, Any]) -> Image:
     """Create Image object from DynamoDB item"""
+    # Convert Decimal values to float
+    converted_data = {}
+    for key, value in data.items():
+        if isinstance(value, Decimal):
+            converted_data[key] = float(value)
+        elif isinstance(value, dict):
+            converted_data[key] = {
+                k: float(v) if isinstance(v, Decimal) else v for k, v in value.items()
+            }
+        else:
+            converted_data[key] = value
+
     return Image(
-        image_id=data.get("image_id", ""),
-        title=data.get("title"),
-        description=data.get("description"),
-        s3_key=data.get("s3_key", ""),
-        file_url=data.get("file_url", ""),
-        original_filename=data.get("original_filename", ""),
-        file_type=data.get("file_type", ""),
-        file_size=data.get("file_size", 0),
-        created_at=data.get("created_at"),
-        updated_at=data.get("updated_at"),
-        dimensions=data.get("dimensions", {}),
-        exif_data=data.get("exif_data", {}),
+        image_id=converted_data.get("image_id", ""),
+        title=converted_data.get("title"),
+        description=converted_data.get("description"),
+        s3_key=converted_data.get("s3_key", ""),
+        file_url=converted_data.get("file_url", ""),
+        original_filename=converted_data.get("original_filename", ""),
+        file_type=converted_data.get("file_type", ""),
+        file_size=converted_data.get("file_size", 0),
+        created_at=converted_data.get("created_at"),
+        updated_at=converted_data.get("updated_at"),
+        dimensions=converted_data.get("dimensions", {}),
+        exif_data=converted_data.get("exif_data", {}),
     )
 
 
 def create_video_from_dict(data: Dict[str, Any]) -> Video:
     """Create Video object from DynamoDB item"""
+    # Convert Decimal values to float
+    converted_data = {}
+    for key, value in data.items():
+        if isinstance(value, Decimal):
+            converted_data[key] = float(value)
+        elif isinstance(value, dict):
+            converted_data[key] = {
+                k: float(v) if isinstance(v, Decimal) else v for k, v in value.items()
+            }
+        else:
+            converted_data[key] = value
+
     return Video(
-        video_id=data.get("video_id", ""),
-        title=data.get("title"),
-        description=data.get("description"),
-        s3_key=data.get("s3_key", ""),
-        file_url=data.get("file_url", ""),
-        original_filename=data.get("original_filename", ""),
-        file_type=data.get("file_type", ""),
-        file_size=data.get("file_size", 0),
-        created_at=data.get("created_at"),
-        updated_at=data.get("updated_at"),
-        duration=data.get("duration", 0.0),
-        resolution=data.get("resolution"),
-        thumbnail_key=data.get("thumbnail_key"),
+        video_id=converted_data.get("video_id", ""),
+        title=converted_data.get("title"),
+        description=converted_data.get("description"),
+        s3_key=converted_data.get("s3_key", ""),
+        file_url=converted_data.get("file_url", ""),
+        original_filename=converted_data.get("original_filename", ""),
+        file_type=converted_data.get("file_type", ""),
+        file_size=converted_data.get("file_size", 0),
+        created_at=converted_data.get("created_at"),
+        updated_at=converted_data.get("updated_at"),
+        duration=converted_data.get("duration", 0.0),
+        resolution=converted_data.get("resolution"),
+        thumbnail_key=converted_data.get("thumbnail_key"),
     )
