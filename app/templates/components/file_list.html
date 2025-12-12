@@ -1,0 +1,164 @@
+{% if items %}
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Filename</th>
+        <th>Size</th>
+        <th>Uploaded</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>
+          <div class="d-flex align-items-start">
+            <div class="file-icon me-2">
+              {% if file_type == 'notes' %} {% if
+              item.original_filename.endswith('.pdf') %}📕 {% elif
+              item.original_filename.endswith('.doc') or
+              item.original_filename.endswith('.docx') %}📄 {% elif
+              item.original_filename.endswith('.xls') or
+              item.original_filename.endswith('.xlsx') %}📊 {% elif
+              item.original_filename.endswith('.ppt') or
+              item.original_filename.endswith('.pptx') %}📽️ {% else %}📝{% endif
+              %} {% elif file_type == 'images' %} 🖼️ {% elif file_type ==
+              'videos' %} 🎥 {% endif %}
+            </div>
+            <div>
+              <strong>{{ item.title or item.original_filename }}</strong>
+              {% if item.description %}
+              <br /><small class="text-muted"
+                >{{ item.description[:80] }}{% if item.description|length > 80
+                %}...{% endif %}</small
+              >
+              {% endif %}
+            </div>
+          </div>
+        </td>
+        <td>
+          <small>{{ item.original_filename }}</small>
+          <br />
+          <span class="badge bg-secondary"
+            >{{ item.file_type.split('/')[-1]|upper }}</span
+          >
+        </td>
+        <td>
+          {{ item.formatted_size }} {% if file_type == 'images' and
+          item.dimensions %}
+          <br />
+          <small class="text-muted"
+            >{{ item.dimensions.width }}×{{ item.dimensions.height }}</small
+          >
+          {% elif file_type == 'videos' and item.duration %}
+          <br />
+          <small class="text-muted">{{ item.duration|round(2) }}s</small>
+          {% endif %}
+        </td>
+        <td>
+          {% if item.created_at %} {{ item.created_at[:10] }}
+          <br />
+          <small class="text-muted">{{ item.created_at[11:16] }}</small>
+          {% else %} N/A {% endif %}
+        </td>
+        <td>
+          <div class="btn-group btn-group-sm" role="group">
+            <a
+              href="{{ url_for('main.view_item', file_type=file_type[:-1], item_id=item[file_type[:-1]+'_id']) }}"
+              class="btn btn-outline-info"
+              data-bs-toggle="tooltip"
+              title="View Details"
+            >
+              👁️
+            </a>
+            <a
+              href="{{ item.file_url }}"
+              target="_blank"
+              class="btn btn-outline-success"
+              data-bs-toggle="tooltip"
+              title="Download"
+            >
+              ⬇️
+            </a>
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              onclick="confirmDelete('{{ file_type[:-1] }}', '{{ item[file_type[:-1]+'_id'] }}', '{{ item.title or item.original_filename }}')"
+              data-bs-toggle="tooltip"
+              title="Delete"
+            >
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination (for future implementation) -->
+{% if total_pages > 1 %}
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+      <a
+        class="page-link"
+        href="{{ url_for('main.browse', tab=file_type, page=current_page-1, search=search_term) }}"
+      >
+        Previous
+      </a>
+    </li>
+
+    {% for page_num in range(1, total_pages + 1) %}
+    <li class="page-item {% if page_num == current_page %}active{% endif %}">
+      <a
+        class="page-link"
+        href="{{ url_for('main.browse', tab=file_type, page=page_num, search=search_term) }}"
+      >
+        {{ page_num }}
+      </a>
+    </li>
+    {% endfor %}
+
+    <li
+      class="page-item {% if current_page == total_pages %}disabled{% endif %}"
+    >
+      <a
+        class="page-link"
+        href="{{ url_for('main.browse', tab=file_type, page=current_page+1, search=search_term) }}"
+      >
+        Next
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endif %} {% else %}
+<div class="text-center py-5">
+  <div class="empty-state-icon mb-3">
+    {% if file_type == 'notes' %}📝 {% elif file_type == 'images' %}🖼️ {% elif
+    file_type == 'videos' %}🎥 {% endif %}
+  </div>
+  <h4>No {{ file_type }} found</h4>
+  <p class="text-muted mb-4">
+    {% if search_term %} No results found for "{{ search_term }}" {% else %}
+    Upload your first {{ file_type[:-1] }} to get started! {% endif %}
+  </p>
+  <a
+    href="{{ url_for('main.upload') }}?type={{ file_type }}"
+    class="btn btn-primary"
+  >
+    Upload {{ file_type|title }}
+  </a>
+  {% if search_term %}
+  <a
+    href="{{ url_for('main.browse', tab=file_type) }}"
+    class="btn btn-outline-secondary"
+  >
+    Clear Search
+  </a>
+  {% endif %}
+</div>
+{% endif %}
