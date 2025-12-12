@@ -1,0 +1,65 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+}
+
+.btn-group .btn {
+  margin-right: 10px;
+}
+
+/* Tab styles */
+.nav-tabs .nav-link {
+  color: #495057;
+  font-weight: 500;
+  padding: 10px 20px;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #fff;
+  border-color: #dee2e6 #dee2e6 #fff;
+  font-weight: 600;
+}
+
+/* File type icons */
+.file-icon {
+  font-size: 2rem;
+  margin-right: 10px;
+}
+
+/* Preview styles */
+.img-preview {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 15px;
+  }
+
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+}
