@@ -1,0 +1,470 @@
+{% extends "base.html" %} {% block title %}Browse Files{% endblock %} {% block
+extra_css %}
+<style>
+  .file-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  tr:hover .file-actions {
+    opacity: 1;
+  }
+
+  .filter-badge {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .filter-badge:hover {
+    transform: scale(1.05);
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="fade-in">
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+      <h1 class="display-5 fw-bold mb-2">
+        <i class="bi bi-folder2-open me-2"></i>Browse Files
+      </h1>
+      <p class="text-muted mb-0">Manage and organize your uploaded files</p>
+    </div>
+    <div>
+      <a href="{{ url_for('main.upload') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Upload New
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-3">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <div class="file-icon doc">
+                <i class="bi bi-file-earmark-text text-white"></i>
+              </div>
+            </div>
+            <div>
+              <h3 class="mb-0">{{ notes_count }}</h3>
+              <small class="text-muted">Documents</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-3">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <div class="file-icon image">
+                <i class="bi bi-image text-white"></i>
+              </div>
+            </div>
+            <div>
+              <h3 class="mb-0">{{ images_count }}</h3>
+              <small class="text-muted">Images</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-3">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <div class="file-icon video">
+                <i class="bi bi-camera-video text-white"></i>
+              </div>
+            </div>
+            <div>
+              <h3 class="mb-0">{{ videos_count }}</h3>
+              <small class="text-muted">Videos</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <form method="GET" class="d-flex">
+            <input type="hidden" name="tab" value="{{ current_tab }}" />
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-end-0">
+                <i class="bi bi-search"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control border-start-0"
+                name="search"
+                placeholder="Search by title, description, or filename..."
+                value="{{ search_term }}"
+              />
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search me-2"></i>Search
+              </button>
+              {% if search_term %}
+              <a
+                href="{{ url_for('main.browse', tab=current_tab) }}"
+                class="btn btn-outline-secondary"
+              >
+                Clear
+              </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+          <div class="btn-group" role="group">
+            <a
+              href="{{ url_for('main.browse', tab='notes', search=search_term) }}"
+              class="btn btn-{% if current_tab == 'notes' %}primary{% else %}outline-primary{% endif %}"
+            >
+              <i class="bi bi-file-earmark-text me-1"></i>Notes
+            </a>
+            <a
+              href="{{ url_for('main.browse', tab='images', search=search_term) }}"
+              class="btn btn-{% if current_tab == 'images' %}primary{% else %}outline-primary{% endif %}"
+            >
+              <i class="bi bi-image me-1"></i>Images
+            </a>
+            <a
+              href="{{ url_for('main.browse', tab='videos', search=search_term) }}"
+              class="btn btn-{% if current_tab == 'videos' %}primary{% else %}outline-primary{% endif %}"
+            >
+              <i class="bi bi-camera-video me-1"></i>Videos
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {% if search_term %}
+      <div class="mt-3">
+        <small class="text-muted">
+          <i class="bi bi-info-circle me-1"></i>
+          Found {{ items|length }} results for "{{ search_term }}"
+        </small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Files Table -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">
+        {% if current_tab == 'notes' %}
+        <i class="bi bi-file-earmark-text me-2"></i>Documents {% elif
+        current_tab == 'images' %} <i class="bi bi-image me-2"></i>Images {%
+        elif current_tab == 'videos' %}
+        <i class="bi bi-camera-video me-2"></i>Videos {% endif %}
+        <span class="badge bg-primary ms-2">{{ items|length }}</span>
+      </h4>
+      <div class="dropdown">
+        <button
+          class="btn btn-outline-secondary dropdown-toggle"
+          type="button"
+          data-bs-toggle="dropdown"
+        >
+          <i class="bi bi-filter me-2"></i>Sort
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#">Newest First</a></li>
+          <li><a class="dropdown-item" href="#">Oldest First</a></li>
+          <li><a class="dropdown-item" href="#">Name A-Z</a></li>
+          <li><a class="dropdown-item" href="#">Size</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      {% if items %}
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 50px"></th>
+              <th>File</th>
+              <th>Size</th>
+              <th>Uploaded</th>
+              <th style="width: 150px" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>
+                <div class="file-icon {{ item.file_type.split('/')[0] }}">
+                  {% if item.file_type.startswith('image/') %}
+                  <i class="bi bi-image text-white"></i>
+                  {% elif item.file_type.startswith('video/') %}
+                  <i class="bi bi-camera-video text-white"></i>
+                  {% else %}
+                  <i class="bi bi-file-earmark-text text-white"></i>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <div>
+                  <h6 class="mb-1">
+                    {{ item.title or item.original_filename }}
+                  </h6>
+                  {% if item.description %}
+                  <p class="text-muted mb-1 small">
+                    {{ item.description[:100] }}{% if item.description|length >
+                    100 %}...{% endif %}
+                  </p>
+                  {% endif %}
+                  <small class="text-muted">{{ item.original_filename }}</small>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-dark">{{ item.formatted_size }}</span>
+              </td>
+              <td>
+                <small class="text-muted">
+                  {{ item.created_at[:10] }}<br />
+                  <span class="text-muted">{{ item.created_at[11:16] }}</span>
+                </small>
+              </td>
+              <td class="text-end file-actions">
+                <div class="btn-group btn-group-sm" role="group">
+                  <a
+                    href="{{ item.file_url }}"
+                    target="_blank"
+                    class="btn btn-outline-success"
+                    data-bs-toggle="tooltip"
+                    title="Download"
+                  >
+                    <i class="bi bi-download"></i>
+                  </a>
+                  <a
+                    href="{{ url_for('main.view_item', file_type=current_tab[:-1], item_id=item[current_tab[:-1]+'_id']) }}"
+                    class="btn btn-outline-info"
+                    data-bs-toggle="tooltip"
+                    title="View Details"
+                  >
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteModal{{ item[current_tab[:-1]+'_id'] }}"
+                    title="Delete"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Delete Modal -->
+            <div
+              class="modal fade"
+              id="deleteModal{{ item[current_tab[:-1]+'_id'] }}"
+              tabindex="-1"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>
+                      Are you sure you want to delete
+                      <strong>{{ item.title or item.original_filename }}</strong
+                      >?
+                    </p>
+                    <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      This action cannot be undone. The file will be permanently
+                      removed.
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <form
+                      method="POST"
+                      action="{{ url_for('main.delete_item', file_type=current_tab[:-1], item_id=item[current_tab[:-1]+'_id']) }}"
+                    >
+                      <button type="submit" class="btn btn-danger">
+                        Delete Permanently
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if items|length > 10 %}
+      <div class="card-footer">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center mb-0">
+            <li class="page-item disabled">
+              <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item active">
+              <a class="page-link" href="#">1</a>
+            </li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      {% endif %} {% else %}
+      <div class="text-center py-5">
+        <div class="mb-4">
+          <i class="bi bi-folder-x display-1 text-muted"></i>
+        </div>
+        <h4>No files found</h4>
+        <p class="text-muted mb-4">
+          {% if search_term %} No results for "{{ search_term }}" {% else %} No
+          {{ current_tab }} uploaded yet {% endif %}
+        </p>
+        <a
+          href="{{ url_for('main.upload') }}?type={{ current_tab }}"
+          class="btn btn-primary"
+        >
+          <i class="bi bi-cloud-upload me-2"></i>Upload {{ current_tab|title }}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3">
+            <i class="bi bi-pie-chart me-2"></i>Storage Distribution
+          </h6>
+          <div class="d-flex align-items-center mb-2">
+            <div class="flex-grow-1">
+              <small class="text-muted">Documents</small>
+            </div>
+            <div class="text-end">
+              <small class="text-muted"
+                >{{ (notes_count/total_count*100)|round(1) if total_count > 0
+                else 0 }}%</small
+              >
+            </div>
+          </div>
+          <div class="progress mb-3" style="height: 6px">
+            <div
+              class="progress-bar bg-primary"
+              style="width: {{ (notes_count/total_count*100)|round(1) if total_count > 0 else 0 }}%"
+            ></div>
+          </div>
+
+          <div class="d-flex align-items-center mb-2">
+            <div class="flex-grow-1">
+              <small class="text-muted">Images</small>
+            </div>
+            <div class="text-end">
+              <small class="text-muted"
+                >{{ (images_count/total_count*100)|round(1) if total_count > 0
+                else 0 }}%</small
+              >
+            </div>
+          </div>
+          <div class="progress mb-3" style="height: 6px">
+            <div
+              class="progress-bar bg-success"
+              style="width: {{ (images_count/total_count*100)|round(1) if total_count > 0 else 0 }}%"
+            ></div>
+          </div>
+
+          <div class="d-flex align-items-center mb-2">
+            <div class="flex-grow-1">
+              <small class="text-muted">Videos</small>
+            </div>
+            <div class="text-end">
+              <small class="text-muted"
+                >{{ (videos_count/total_count*100)|round(1) if total_count > 0
+                else 0 }}%</small
+              >
+            </div>
+          </div>
+          <div class="progress" style="height: 6px">
+            <div
+              class="progress-bar bg-danger"
+              style="width: {{ (videos_count/total_count*100)|round(1) if total_count > 0 else 0 }}%"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3">
+            <i class="bi bi-lightning me-2"></i>Quick Actions
+          </h6>
+          <div class="d-grid gap-2">
+            <a
+              href="{{ url_for('main.upload') }}"
+              class="btn btn-outline-primary"
+            >
+              <i class="bi bi-cloud-upload me-2"></i>Upload New File
+            </a>
+            <a href="{{ url_for('main.statistics') }}" class="btn btn-outline-info">
+              <i class="bi bi-bar-chart me-2"></i>View Statistics
+            </a>
+            <a
+              href="{{ url_for('main.search') }}"
+              class="btn btn-outline-success"
+            >
+              <i class="bi bi-search me-2"></i>Advanced Search
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      // Initialize tooltips
+      const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+
+      // Calculate total count
+      const totalCount = {{ notes_count|default(0) }} + {{ images_count|default(0) }} + {{ videos_count|default(0) }};
+
+      // Add any browse-specific JavaScript here
+      console.log('Browse page loaded. Total files:', totalCount);
+  });
+</script>
+{% endblock %}
