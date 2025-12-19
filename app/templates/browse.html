@@ -203,7 +203,9 @@ extra_css %}
             {% for item in items %}
             <tr>
               <td>
-                <div class="file-icon {{ item.file_type.split('/')[0] }}">
+                <div
+                  class="file-icon {{ 'doc' if item.file_type.startswith('application/') or item.file_type.startswith('text/') else item.file_type.split('/')[0] }}"
+                >
                   {% if item.file_type.startswith('image/') %}
                   <i class="bi bi-image text-white"></i>
                   {% elif item.file_type.startswith('video/') %}
@@ -438,7 +440,10 @@ extra_css %}
             >
               <i class="bi bi-cloud-upload me-2"></i>Upload New File
             </a>
-            <a href="{{ url_for('main.statistics') }}" class="btn btn-outline-info">
+            <a
+              href="{{ url_for('main.statistics') }}"
+              class="btn btn-outline-info"
+            >
               <i class="bi bi-bar-chart me-2"></i>View Statistics
             </a>
             <a
