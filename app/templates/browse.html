@@ -169,19 +169,76 @@ extra_css %}
         <i class="bi bi-camera-video me-2"></i>Videos {% endif %}
         <span class="badge bg-primary ms-2">{{ items|length }}</span>
       </h4>
+      <!-- Replace the dropdown section in browse.html -->
       <div class="dropdown">
         <button
           class="btn btn-outline-secondary dropdown-toggle"
           type="button"
           data-bs-toggle="dropdown"
         >
-          <i class="bi bi-filter me-2"></i>Sort
+          <i
+            class="bi bi-{% if sort_by == 'newest' %}sort-down{% elif sort_by == 'oldest' %}sort-up{% else %}filter{% endif %} me-2"
+          ></i>
+          {% if sort_by == 'newest' %}Newest First {% elif sort_by == 'oldest'
+          %}Oldest First {% elif sort_by == 'name' %}Name {% if sort_order ==
+          'asc' %}A-Z{% else %}Z-A{% endif %} {% elif sort_by == 'size' %}Size
+          {% if sort_order == 'desc' %}Largest{% else %}Smallest{% endif %} {%
+          else %}Sort{% endif %}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="#">Newest First</a></li>
-          <li><a class="dropdown-item" href="#">Oldest First</a></li>
-          <li><a class="dropdown-item" href="#">Name A-Z</a></li>
-          <li><a class="dropdown-item" href="#">Size</a></li>
+          <li><h6 class="dropdown-header">By Date</h6></li>
+          <li>
+            <a
+              class="dropdown-item {% if sort_by == 'newest' and sort_order == 'desc' %}active{% endif %}"
+              href="{{ url_for('main.browse', tab=current_tab, search=search_term, sort='newest', order='desc') }}"
+            >
+              <i class="bi bi-sort-down-alt me-2"></i>Newest First
+            </a>
+          </li>
+          <li>
+            <a
+              class="dropdown-item {% if sort_by == 'oldest' or (sort_by == 'newest' and sort_order == 'asc') %}active{% endif %}"
+              href="{{ url_for('main.browse', tab=current_tab, search=search_term, sort='oldest', order='asc') }}"
+            >
+              <i class="bi bi-sort-up-alt me-2"></i>Oldest First
+            </a>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li><h6 class="dropdown-header">By Name</h6></li>
+          <li>
+            <a
+              class="dropdown-item {% if sort_by == 'name' and sort_order == 'asc' %}active{% endif %}"
+              href="{{ url_for('main.browse', tab=current_tab, search=search_term, sort='name', order='asc') }}"
+            >
+              <i class="bi bi-sort-alpha-down me-2"></i>Name A-Z
+            </a>
+          </li>
+          <li>
+            <a
+              class="dropdown-item {% if sort_by == 'name' and sort_order == 'desc' %}active{% endif %}"
+              href="{{ url_for('main.browse', tab=current_tab, search=search_term, sort='name', order='desc') }}"
+            >
+              <i class="bi bi-sort-alpha-down-alt me-2"></i>Name Z-A
+            </a>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li><h6 class="dropdown-header">By Size</h6></li>
+          <li>
+            <a
+              class="dropdown-item {% if sort_by == 'size' and sort_order == 'desc' %}active{% endif %}"
+              href="{{ url_for('main.browse', tab=current_tab, search=search_term, sort='size', order='desc') }}"
+            >
+              <i class="bi bi-sort-numeric-down me-2"></i>Largest First
+            </a>
+          </li>
+          <li>
+            <a
+              class="dropdown-item {% if sort_by == 'size' and sort_order == 'asc' %}active{% endif %}"
+              href="{{ url_for('main.browse', tab=current_tab, search=search_term, sort='size', order='asc') }}"
+            >
+              <i class="bi bi-sort-numeric-up me-2"></i>Smallest First
+            </a>
+          </li>
         </ul>
       </div>
     </div>
