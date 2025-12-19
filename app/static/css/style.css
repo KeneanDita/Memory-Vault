@@ -59,6 +59,18 @@ h1, h2, h3, h4, h5, h6 {
     transition: all 0.3s ease;
 }
 
+.file-icon.doc i,
+.file-icon.text i,
+.file-icon.application i {
+    font-size: 1.2rem !important;
+    opacity: 1 !important;
+}
+
+/* Ensure all file icons have good contrast */
+.file-icon {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     border: none;
