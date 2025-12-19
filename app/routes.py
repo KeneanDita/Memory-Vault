@@ -259,6 +259,8 @@ def browse():
     """Browse all stored files with tabs"""
     tab = request.args.get("tab", "notes")
     search_term = request.args.get("search", "")
+    sort_by = request.args.get("sort", "newest")  # Get sort parameter
+    sort_order = request.args.get("order", "desc")  # Get order parameter
 
     # Get items based on tab and convert to models
     if tab == "notes":
@@ -280,11 +282,14 @@ def browse():
             items_data = db_service.search_items("videos", search_term)
         else:
             items_data = db_service.get_all_videos()
-        items = [create_video_from_dict(item) for item in items_data]
+        items = [create_video_from_dict(video) for video in videos_data]
         file_type = "videos"
     else:
         items = []
         file_type = "notes"
+
+    # Apply sorting
+    items = sort_files(items, sort_by, sort_order)
 
     # Format file sizes and prepare for template
     for item in items:
@@ -308,8 +313,31 @@ def browse():
         notes_count=len(all_notes),
         images_count=len(all_images),
         videos_count=len(all_videos),
-        total_count=total_count,  # Add this
+        total_count=total_count,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
+
+
+def sort_files(files, sort_by="newest", order="desc"):
+    """Sort files based on criteria"""
+    if not files:
+        return files
+
+    # Determine sort key
+    if sort_by == "name":
+        sort_key = lambda x: (x.title or x.original_filename or "").lower()
+    elif sort_by == "size":
+        sort_key = lambda x: getattr(x, "file_size", 0)
+    elif sort_by == "type":
+        sort_key = lambda x: getattr(x, "file_type", "")
+    else:  # Default to date (newest/oldest)
+        sort_key = lambda x: getattr(x, "created_at", "")
+
+    # Sort the files
+    sorted_files = sorted(files, key=sort_key, reverse=(order == "desc"))
+
+    return sorted_files
 
 
 @bp.route("/view/<file_type>/<item_id>")
