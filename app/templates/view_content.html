@@ -64,7 +64,7 @@ item.original_filename }}{% endblock %} {% block extra_css %}
                 </div>
               </div>
               <div>
-                <h1 class="h2 mb-2">
+                <h1 class="h2 mb-2" style="color: #4361ee">
                   {{ item.title or item.original_filename }}
                 </h1>
                 {% if item.description %}
@@ -88,15 +88,6 @@ item.original_filename }}{% endblock %} {% block extra_css %}
                     target="_blank"
                   >
                     <i class="bi bi-download me-2"></i>Download
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    onclick="navigator.clipboard.writeText('{{ item.file_url }}'); alert('URL copied to clipboard!')"
-                  >
-                    <i class="bi bi-link me-2"></i>Copy URL
                   </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
