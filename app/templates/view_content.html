@@ -50,17 +50,19 @@ item.original_filename }}{% endblock %} {% block extra_css %}
           <div class="d-flex justify-content-between align-items-start">
             <div class="d-flex align-items-start">
               <div class="me-3">
-                <div
-                  class="file-icon {{ item.file_type.split('/')[0] }}"
-                  style="width: 64px; height: 64px"
-                >
-                  {% if file_type == 'image' %}
-                  <i class="bi bi-image text-white fs-3"></i>
-                  {% elif file_type == 'video' %}
-                  <i class="bi bi-camera-video text-white fs-3"></i>
-                  {% else %}
-                  <i class="bi bi-file-earmark-text text-white fs-3"></i>
-                  {% endif %}
+                <div class="me-3">
+                  <div
+                    class="file-icon {% if file_type == 'image' %}image {% elif file_type == 'video' %}video {% else %}doc note-blue-pink{% endif %}"
+                    style="width: 64px; height: 64px"
+                  >
+                    {% if file_type == 'image' %}
+                    <i class="bi bi-image text-white fs-3"></i>
+                    {% elif file_type == 'video' %}
+                    <i class="bi bi-camera-video text-white fs-3"></i>
+                    {% else %}
+                    <i class="bi bi-file-earmark-text text-white fs-3"></i>
+                    {% endif %}
+                  </div>
                 </div>
               </div>
               <div>
