@@ -159,49 +159,15 @@ extra_css %}
         </div>
         <div class="card-body">
           <div class="chart-container">
-            <!-- This would be a chart using Chart.js or similar -->
-            <div class="text-center py-5">
-              <i class="bi bi-pie-chart display-1 text-muted mb-3"></i>
-              <p class="text-muted">Chart visualization would appear here</p>
-              <div class="row mt-4">
-                <div class="col-md-4">
-                  <div class="d-flex align-items-center mb-2">
-                    <div
-                      class="rounded-circle bg-primary me-2"
-                      style="width: 12px; height: 12px"
-                    ></div>
-                    <small class="text-muted"
-                      >Documents ({{ ((notes_count/total_count)*100)|round(1) if
-                      total_count > 0 else 0 }}%)</small
-                    >
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="d-flex align-items-center mb-2">
-                    <div
-                      class="rounded-circle bg-success me-2"
-                      style="width: 12px; height: 12px"
-                    ></div>
-                    <small class="text-muted"
-                      >Images ({{ ((images_count/total_count)*100)|round(1) if
-                      total_count > 0 else 0 }}%)</small
-                    >
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="d-flex align-items-center mb-2">
-                    <div
-                      class="rounded-circle bg-danger me-2"
-                      style="width: 12px; height: 12px"
-                    ></div>
-                    <small class="text-muted"
-                      >Videos ({{ ((videos_count/total_count)*100)|round(1) if
-                      total_count > 0 else 0 }}%)</small
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
+            <canvas id="storageChart"></canvas>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4"></div>
           </div>
         </div>
       </div>
@@ -313,7 +279,9 @@ extra_css %}
                           {% elif file.file_type.startswith('video/') %}
                           <i class="bi bi-camera-video text-white"></i>
                           {% else %}
-                          <i class="bi bi-file-earmark-text text-white"></i>
+                          <div class="file-icon doc">
+                            <i class="bi bi-file-earmark-text text-white"></i>
+                          </div>
                           {% endif %}
                         </div>
                       </div>
