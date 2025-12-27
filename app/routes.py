@@ -282,7 +282,7 @@ def browse():
             items_data = db_service.search_items("videos", search_term)
         else:
             items_data = db_service.get_all_videos()
-        items = [create_video_from_dict(video) for video in videos_data]
+        items = [create_video_from_dict(item) for item in items_data]
         file_type = "videos"
     else:
         items = []
