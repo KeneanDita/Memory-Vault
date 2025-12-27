@@ -163,7 +163,7 @@ extra_css %}
     <div class="card-header d-flex justify-content-between align-items-center">
       <h4 class="mb-0">
         {% if current_tab == 'notes' %}
-        <i class="bi bi-file-earmark-text me-2"></i>Documents {% elif
+        <i class="bi bi-file-earmark-text me-1"></i>Documents {% elif
         current_tab == 'images' %} <i class="bi bi-image me-2"></i>Images {%
         elif current_tab == 'videos' %}
         <i class="bi bi-camera-video me-2"></i>Videos {% endif %}
@@ -267,6 +267,8 @@ extra_css %}
                   <i class="bi bi-image text-white"></i>
                   {% elif item.file_type.startswith('video/') %}
                   <i class="bi bi-camera-video text-white"></i>
+                  {% elif item.file_type.startswith('note/') %}
+                  <i class="bi bi-file-earmark-text text-white"></i>
                   {% else %}
                   <i class="bi bi-file-earmark-text text-white"></i>
                   {% endif %}
