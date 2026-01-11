@@ -46,11 +46,92 @@ def index():
     image_models = [create_image_from_dict(image) for image in images]
     video_models = [create_video_from_dict(video) for video in videos]
 
+    # Get all files combined and sort by date
+    all_files = note_models + image_models + video_models
+    # Sort by created_at (newest first)
+    all_files.sort(
+        key=lambda x: x.created_at if hasattr(x, "created_at") else "", reverse=True
+    )
+
+    # Take only recent 5 files
+    recent_files = all_files[:5]
+
+    # Format file sizes
+    for file in recent_files:
+        if hasattr(file, "file_size"):
+            file.formatted_size = format_file_size(file.file_size)
+
     return render_template(
         "index.html",
         notes_count=len(note_models),
         images_count=len(image_models),
         videos_count=len(video_models),
+        recent_files=recent_files,  # Add this
+    )
+
+
+@bp.route("/stats")
+def statistics():
+    """Show statistics about stored files"""
+    notes = db_service.get_all_notes()
+    images = db_service.get_all_images()
+    videos = db_service.get_all_videos()
+
+    # Calculate statistics
+    notes_count = len(notes)
+    images_count = len(images)
+    videos_count = len(videos)
+    total_count = notes_count + images_count + videos_count
+
+    # Calculate total size
+    notes_size = sum(note.get("file_size", 0) for note in notes)
+    images_size = sum(image.get("file_size", 0) for image in images)
+    videos_size = sum(video.get("file_size", 0) for video in videos)
+    total_size = notes_size + images_size + videos_size
+
+    # Format sizes
+    notes_size_fmt = format_file_size(notes_size)
+    images_size_fmt = format_file_size(images_size)
+    videos_size_fmt = format_file_size(videos_size)
+    total_size_fmt = format_file_size(total_size)
+
+    # Get recent files for activity
+    all_files = []
+    for note in notes:
+        note_dict = create_note_from_dict(note)
+        note_dict.formatted_size = format_file_size(note.get("file_size", 0))
+        all_files.append(note_dict)
+
+    for image in images:
+        image_dict = create_image_from_dict(image)
+        image_dict.formatted_size = format_file_size(image.get("file_size", 0))
+        all_files.append(image_dict)
+
+    for video in videos:
+        video_dict = create_video_from_dict(video)
+        video_dict.formatted_size = format_file_size(video.get("file_size", 0))
+        all_files.append(video_dict)
+
+    # Sort by created_at (newest first)
+    all_files.sort(
+        key=lambda x: x.created_at if hasattr(x, "created_at") else "", reverse=True
+    )
+    recent_files = all_files[:10]
+
+    return render_template(
+        "stats.html",
+        notes_count=notes_count,
+        images_count=images_count,
+        videos_count=videos_count,
+        total_count=total_count,
+        notes_size=notes_size_fmt,
+        images_size=images_size_fmt,
+        videos_size=videos_size_fmt,
+        total_size=total_size_fmt,
+        recent_files=recent_files,  # Add this
+        usage_percentage=min(
+            100, (total_size / (1024 * 1024 * 1024)) * 100
+        ),  # Calculate as % of 1GB
     )
 
 
@@ -178,6 +259,8 @@ def browse():
     """Browse all stored files with tabs"""
     tab = request.args.get("tab", "notes")
     search_term = request.args.get("search", "")
+    sort_by = request.args.get("sort", "newest")  # Get sort parameter
+    sort_order = request.args.get("order", "desc")  # Get order parameter
 
     # Get items based on tab and convert to models
     if tab == "notes":
@@ -205,6 +288,9 @@ def browse():
         items = []
         file_type = "notes"
 
+    # Apply sorting
+    items = sort_files(items, sort_by, sort_order)
+
     # Format file sizes and prepare for template
     for item in items:
         if hasattr(item, "file_size"):
@@ -227,8 +313,31 @@ def browse():
         notes_count=len(all_notes),
         images_count=len(all_images),
         videos_count=len(all_videos),
-        total_count=total_count,  # Add this
+        total_count=total_count,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
+
+
+def sort_files(files, sort_by="newest", order="desc"):
+    """Sort files based on criteria"""
+    if not files:
+        return files
+
+    # Determine sort key
+    if sort_by == "name":
+        sort_key = lambda x: (x.title or x.original_filename or "").lower()
+    elif sort_by == "size":
+        sort_key = lambda x: getattr(x, "file_size", 0)
+    elif sort_by == "type":
+        sort_key = lambda x: getattr(x, "file_type", "")
+    else:  # Default to date (newest/oldest)
+        sort_key = lambda x: getattr(x, "created_at", "")
+
+    # Sort the files
+    sorted_files = sorted(files, key=sort_key, reverse=(order == "desc"))
+
+    return sorted_files
 
 
 @bp.route("/view/<file_type>/<item_id>")
@@ -387,44 +496,6 @@ def download_item(file_type, item_id):
     except Exception as e:
         flash(f"Download failed: {str(e)}", "error")
         return redirect(url_for("main.view_item", file_type=file_type, item_id=item_id))
-
-
-@bp.route("/stats")
-def statistics():
-    """Show statistics about stored files"""
-    notes = db_service.get_all_notes()
-    images = db_service.get_all_images()
-    videos = db_service.get_all_videos()
-
-    # Calculate statistics
-    notes_count = len(notes)
-    images_count = len(images)
-    videos_count = len(videos)
-    total_count = notes_count + images_count + videos_count
-
-    # Calculate total size
-    notes_size = sum(note.get("file_size", 0) for note in notes)
-    images_size = sum(image.get("file_size", 0) for image in images)
-    videos_size = sum(video.get("file_size", 0) for video in videos)
-    total_size = notes_size + images_size + videos_size
-
-    # Format sizes
-    notes_size_fmt = format_file_size(notes_size)
-    images_size_fmt = format_file_size(images_size)
-    videos_size_fmt = format_file_size(videos_size)
-    total_size_fmt = format_file_size(total_size)
-
-    return render_template(
-        "stats.html",
-        notes_count=notes_count,
-        images_count=images_count,
-        videos_count=videos_count,
-        total_count=total_count,
-        notes_size=notes_size_fmt,
-        images_size=images_size_fmt,
-        videos_size=videos_size_fmt,
-        total_size=total_size_fmt,
-    )
 
 
 @bp.route("/search")

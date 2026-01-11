@@ -50,21 +50,23 @@ item.original_filename }}{% endblock %} {% block extra_css %}
           <div class="d-flex justify-content-between align-items-start">
             <div class="d-flex align-items-start">
               <div class="me-3">
-                <div
-                  class="file-icon {{ item.file_type.split('/')[0] }}"
-                  style="width: 64px; height: 64px"
-                >
-                  {% if file_type == 'image' %}
-                  <i class="bi bi-image text-white fs-3"></i>
-                  {% elif file_type == 'video' %}
-                  <i class="bi bi-camera-video text-white fs-3"></i>
-                  {% else %}
-                  <i class="bi bi-file-earmark-text text-white fs-3"></i>
-                  {% endif %}
+                <div class="me-3">
+                  <div
+                    class="file-icon {% if file_type == 'image' %}image {% elif file_type == 'video' %}video {% else %}doc note-blue-pink{% endif %}"
+                    style="width: 64px; height: 64px"
+                  >
+                    {% if file_type == 'image' %}
+                    <i class="bi bi-image text-white fs-3"></i>
+                    {% elif file_type == 'video' %}
+                    <i class="bi bi-camera-video text-white fs-3"></i>
+                    {% else %}
+                    <i class="bi bi-file-earmark-text text-white fs-3"></i>
+                    {% endif %}
+                  </div>
                 </div>
               </div>
               <div>
-                <h1 class="h2 mb-2">
+                <h1 class="h2 mb-2" style="color: #4361ee">
                   {{ item.title or item.original_filename }}
                 </h1>
                 {% if item.description %}
@@ -88,15 +90,6 @@ item.original_filename }}{% endblock %} {% block extra_css %}
                     target="_blank"
                   >
                     <i class="bi bi-download me-2"></i>Download
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    onclick="navigator.clipboard.writeText('{{ item.file_url }}'); alert('URL copied to clipboard!')"
-                  >
-                    <i class="bi bi-link me-2"></i>Copy URL
                   </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>

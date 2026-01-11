@@ -159,50 +159,19 @@ extra_css %}
         </div>
         <div class="card-body">
           <div class="chart-container">
-            <!-- This would be a chart using Chart.js or similar -->
-            <div class="text-center py-5">
-              <i class="bi bi-pie-chart display-1 text-muted mb-3"></i>
-              <p class="text-muted">Chart visualization would appear here</p>
-              <div class="row mt-4">
-                <div class="col-md-4">
-                  <div class="d-flex align-items-center mb-2">
-                    <div
-                      class="rounded-circle bg-primary me-2"
-                      style="width: 12px; height: 12px"
-                    ></div>
-                    <small class="text-muted"
-                      >Documents ({{ ((notes_count/total_count)*100)|round(1) if
-                      total_count > 0 else 0 }}%)</small
-                    >
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="d-flex align-items-center mb-2">
-                    <div
-                      class="rounded-circle bg-success me-2"
-                      style="width: 12px; height: 12px"
-                    ></div>
-                    <small class="text-muted"
-                      >Images ({{ ((images_count/total_count)*100)|round(1) if
-                      total_count > 0 else 0 }}%)</small
-                    >
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="d-flex align-items-center mb-2">
-                    <div
-                      class="rounded-circle bg-danger me-2"
-                      style="width: 12px; height: 12px"
-                    ></div>
-                    <small class="text-muted"
-                      >Videos ({{ ((videos_count/total_count)*100)|round(1) if
-                      total_count > 0 else 0 }}%)</small
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
+            <canvas id="storageChart"></canvas>
           </div>
+
+          <div class="row mt-4">
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4"></div>
+          </div>
+          <p class="text-center fw-bold mt-4 text-dark">
+            Hover over the chart segments to see file counts and percentages.
+          </p>
         </div>
       </div>
     </div>
@@ -313,7 +282,9 @@ extra_css %}
                           {% elif file.file_type.startswith('video/') %}
                           <i class="bi bi-camera-video text-white"></i>
                           {% else %}
-                          <i class="bi bi-file-earmark-text text-white"></i>
+                          <div class="file-icon doc">
+                            <i class="bi bi-file-earmark-text text-white"></i>
+                          </div>
                           {% endif %}
                         </div>
                       </div>
@@ -363,9 +334,88 @@ extra_css %}
 </div>
 {% endblock %} {% block scripts %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Add any stats-specific JavaScript here
-    console.log("Statistics page loaded");
+  document.addEventListener('DOMContentLoaded', function() {
+      // Storage Distribution Chart
+      const ctx = document.getElementById('storageChart').getContext('2d');
+      const storageChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+              labels: ['Documents', 'Images', 'Videos'],
+              datasets: [{
+                  data: [
+                      {{ notes_count }},
+                      {{ images_count }},
+                      {{ videos_count }}
+                  ],
+                  backgroundColor: [
+                      '#4361ee',
+                      '#7209b7',
+                      '#f72585'
+                  ],
+                  borderColor: [
+                      'rgba(255, 255, 255, 0.8)',
+                      'rgba(255, 255, 255, 0.8)',
+                      'rgba(255, 255, 255, 0.8)'
+                  ],
+                  borderWidth: 2,
+                  hoverOffset: 15
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                  legend: {
+                      position: 'right',
+                      labels: {
+                          color: '#6c757d',
+                          padding: 20,
+                          font: {
+                              size: 12
+                          }
+                      }
+                  },
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              let label = context.label || '';
+                              if (label) {
+                                  label += ': ';
+                              }
+                              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                              const percentage = Math.round((context.parsed * 100) / total);
+                              label += context.parsed + ' files (' + percentage + '%)';
+                              return label;
+                          }
+                      }
+                  }
+              },
+              cutout: '65%'
+          }
+      });
+
+      // Time range filter
+      const timeRangeLinks = document.querySelectorAll('.time-range');
+      timeRangeLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+              e.preventDefault();
+              const range = this.getAttribute('data-range');
+
+              // Update active state
+              timeRangeLinks.forEach(l => l.classList.remove('active'));
+              this.classList.add('active');
+
+              // Update dropdown text
+              document.getElementById('timeRangeDropdown').textContent = this.textContent;
+
+              // Here you would fetch new data based on time range
+              // For now, we'll just show a message
+              console.log('Time range changed to:', range);
+              // Implement AJAX call to update chart data
+          });
+      });
+
+      console.log('Stats page loaded with chart');
   });
 </script>
 {% endblock %}
