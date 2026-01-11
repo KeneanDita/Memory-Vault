@@ -1,6 +1,4 @@
-# Memory Vault
-
-**One-liner:**  
+# Memory Vault 
 A secure, personal memory-management app for capturing, organizing, and revisiting important moments, notes, and media.
 
 Memory Vault lets users safely store and retrieve memories (text, images, audio, video). It supports tagging, searching, timelines, and optional sharing, with privacy-first defaults.
