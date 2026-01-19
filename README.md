@@ -10,6 +10,7 @@ Memory Vault lets users safely store and retrieve memories (text, images, audio,
 - Add, edit, delete memories  
 - Upload images, notes, and video  
 - Tagging & full-text search  
+- Built in Image and Video viewer
 - Browse memories by date/timeline  
 - Scheduled backups (optional)
 
