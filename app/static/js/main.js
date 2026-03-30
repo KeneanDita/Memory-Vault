@@ -62,29 +62,32 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Theme switcher (optional)
+  // Theme switcher
   const themeToggle = document.getElementById("themeToggle");
+
+  function setThemeIcon(theme) {
+    if (!themeToggle) return;
+    // Dark mode active → show sun (click to go light)
+    // Light mode active → show moon-stars (click to go dark)
+    themeToggle.innerHTML =
+      theme === "dark"
+        ? '<i class="bi bi-sun-fill"></i>'
+        : '<i class="bi bi-moon-stars-fill"></i>';
+  }
+
+  // Sync icon with the theme already applied by the <head> script
+  const appliedTheme =
+    document.documentElement.getAttribute("data-bs-theme") || "dark";
+  setThemeIcon(appliedTheme);
+
   if (themeToggle) {
     themeToggle.addEventListener("click", function () {
-      const currentTheme =
-        document.documentElement.getAttribute("data-bs-theme");
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-bs-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
-
-      this.innerHTML =
-        newTheme === "dark"
-          ? '<i class="bi bi-moon"></i>'
-          : '<i class="bi bi-sun"></i>';
+      const current = document.documentElement.getAttribute("data-bs-theme");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-bs-theme", next);
+      localStorage.setItem("theme", next);
+      setThemeIcon(next);
     });
-
-    // Load saved theme
-    const savedTheme = localStorage.getItem("theme") || "dark";
-    document.documentElement.setAttribute("data-bs-theme", savedTheme);
-    themeToggle.innerHTML =
-      savedTheme === "dark"
-        ? '<i class="bi bi-moon"></i>'
-        : '<i class="bi bi-sun"></i>';
   }
 
   // File download counter
