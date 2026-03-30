@@ -169,7 +169,7 @@ extra_css %}
 
             <div class="col-md-4"></div>
           </div>
-          <p class="text-center fw-bold mt-4 text-dark">
+          <p class="text-center fw-bold mt-4 text-muted">
             Hover over the chart segments to see file counts and percentages.
           </p>
         </div>
@@ -335,6 +335,11 @@ extra_css %}
 {% endblock %} {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+      // Detect current theme for chart colors
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const legendColor  = isDark ? '#7a80a4' : '#5a5f82';
+      const borderColor  = isDark ? '#1b1d2e'  : '#ffffff';
+
       // Storage Distribution Chart
       const ctx = document.getElementById('storageChart').getContext('2d');
       const storageChart = new Chart(ctx, {
@@ -349,15 +354,11 @@ extra_css %}
                   ],
                   backgroundColor: [
                       '#4361ee',
-                      '#7209b7',
+                      '#a855f7',
                       '#f72585'
                   ],
-                  borderColor: [
-                      'rgba(255, 255, 255, 0.8)',
-                      'rgba(255, 255, 255, 0.8)',
-                      'rgba(255, 255, 255, 0.8)'
-                  ],
-                  borderWidth: 2,
+                  borderColor: borderColor,
+                  borderWidth: 3,
                   hoverOffset: 15
               }]
           },
@@ -368,20 +369,18 @@ extra_css %}
                   legend: {
                       position: 'right',
                       labels: {
-                          color: '#6c757d',
+                          color: legendColor,
                           padding: 20,
-                          font: {
-                              size: 12
-                          }
+                          font: { size: 12 },
+                          usePointStyle: true,
+                          pointStyle: 'circle'
                       }
                   },
                   tooltip: {
                       callbacks: {
                           label: function(context) {
                               let label = context.label || '';
-                              if (label) {
-                                  label += ': ';
-                              }
+                              if (label) label += ': ';
                               const total = context.dataset.data.reduce((a, b) => a + b, 0);
                               const percentage = Math.round((context.parsed * 100) / total);
                               label += context.parsed + ' files (' + percentage + '%)';
@@ -390,7 +389,7 @@ extra_css %}
                       }
                   }
               },
-              cutout: '65%'
+              cutout: '68%'
           }
       });
 
