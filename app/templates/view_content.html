@@ -1,26 +1,7 @@
 {% extends "base.html" %} {% block title %}{{ item.title or
 item.original_filename }}{% endblock %} {% block extra_css %}
 <style>
-  .preview-container {
-    background: linear-gradient(135deg, #1f2937, #374151);
-    border-radius: 12px;
-    padding: 2rem;
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .metadata-badge {
-    background-color: rgba(99, 102, 241, 0.1);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    color: #6366f1;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  /* preview-container and metadata-badge are handled by style.css using CSS variables */
 </style>
 {% endblock %} {% block content %}
 <div class="fade-in">
@@ -64,7 +45,7 @@ item.original_filename }}{% endblock %} {% block extra_css %}
                 </div>
               </div>
               <div>
-                <h1 class="h2 mb-2" style="color: #4361ee">
+                <h1 class="h2 mb-2 text-primary">
                   {{ item.title or item.original_filename }}
                 </h1>
                 {% if item.description %}
